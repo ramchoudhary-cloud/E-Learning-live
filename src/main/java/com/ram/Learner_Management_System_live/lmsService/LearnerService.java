@@ -3,10 +3,12 @@ package com.ram.Learner_Management_System_live.lmsService;
 import com.ram.Learner_Management_System_live.DTO.CohortDTO;
 import com.ram.Learner_Management_System_live.DTO.LearnerDTO;
 import com.ram.Learner_Management_System_live.entity.Cohort;
+import com.ram.Learner_Management_System_live.entity.Course;
 import com.ram.Learner_Management_System_live.entity.Learner;
 import com.ram.Learner_Management_System_live.exception.CohortNotFoundException;
 import com.ram.Learner_Management_System_live.exception.LearnerNotFoundException;
 import com.ram.Learner_Management_System_live.lmsRepository.CohortRepository;
+import com.ram.Learner_Management_System_live.lmsRepository.CourseRepository;
 import com.ram.Learner_Management_System_live.lmsRepository.LearnerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -25,6 +27,9 @@ public class LearnerService {
 
     @Autowired
     CohortRepository _cohortRepository;
+
+    @Autowired
+    CourseRepository _courseRepository;
 
     public Learner createLearner(Learner learner){
         return _learnerRepository.save(learner);
@@ -85,7 +90,7 @@ public class LearnerService {
         }
 
         Cohort existingCohort = optionalCohort.get();
-        for(Learner learner : existingCohort.getLearners()){ // check whether given learner exist in given cohort or not
+        for(Learner learner : existingCohort.getLearners()){ // check relationship whether given learner exist in given cohort or not
             if(learner.getLearnerId().equals(learnerId))
                 return optionalCohort.get();
         }
@@ -121,6 +126,10 @@ public class LearnerService {
             learnerDTOS.add(learnerDTO);
         }
         return learnerDTOS;
+    }
+
+    public Course createCourse(Course course){
+        return _courseRepository.save(course);
     }
 
 //    public LearnerDTO convertLearnerTOLeanerDTO(Learner learner) {

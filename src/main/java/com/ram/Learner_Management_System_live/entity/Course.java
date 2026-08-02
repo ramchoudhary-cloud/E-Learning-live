@@ -13,18 +13,14 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Cohort {
+public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long cohortId;
-    private String cohortName;
-    private String cohortDescription;
+    private Long courseID;
 
-    @ManyToMany  // this side become OWNER relation
-    private List<Learner> learners;
+    private String courseName;
+    private String courseDescription;
 
-    @ManyToOne
-    private Course course;
-
-
+    @OneToMany(mappedBy = "course")
+    private List<Cohort> cohorts;
 }
