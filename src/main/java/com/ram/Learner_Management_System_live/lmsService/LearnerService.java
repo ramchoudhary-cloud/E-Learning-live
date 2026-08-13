@@ -49,15 +49,15 @@ public class LearnerService {
     // but the add need to handle it via @ExceptionHandler like we do with checked exception with "throws"
     // otherwise response will be not gracefully
 
-    @Cacheable(value = "learners", key = "#learnerId")
+    //@Cacheable(value = "learners", key = "#learnerId")
     public Learner getById(Long learnerId) throws LearnerNotFoundException {
         Optional<Learner> optionalLearner = _learnerRepository.findById(learnerId);
         if(optionalLearner.isEmpty())
-            throw new LearnerNotFoundException("Learner with Id "+ learnerId +" not found");
+            throw new LearnerNotFoundException("learner with id "+ learnerId +" not found");
         return optionalLearner.get();
     }
 
-    @CacheEvict(value = "learners", key = "#learnerId")
+    //@CacheEvict(value = "learners", key = "#learnerId")
     public void deleteLearner(Long learnerId) throws LearnerNotFoundException{
         if(! _learnerRepository.existsById(learnerId))
             throw new LearnerNotFoundException("learner with id: "+ learnerId+"not found");
@@ -65,19 +65,27 @@ public class LearnerService {
         _learnerRepository.deleteById(learnerId);
     }
 
-    public List<Learner> findByName(String learnerName){
-        return _learnerRepository.findByLearnerName(learnerName);
+    public List<Learner> findByName(String learnerName) throws LearnerNotFoundException{
+         List<Learner> learnerList =  _learnerRepository.findByLearnerName(learnerName);
+         if(learnerList.isEmpty()){
+             throw new LearnerNotFoundException("learner with name: " +learnerName +"not found");
+         }
+         return learnerList;
     }
 
-    public Optional<Learner> findByEmail(String learnerEmail){
-        return _learnerRepository.findByLearnerEmail(learnerEmail);
+    public Optional<Learner> findByEmail(String learnerEmail) throws LearnerNotFoundException{
+        Optional<Learner> learnerOptional =  _learnerRepository.findByLearnerEmail(learnerEmail);
+         if(learnerOptional.isEmpty()){
+             throw new LearnerNotFoundException("learner with email: "+ learnerEmail +"not found");
+         }
+         return learnerOptional;
     }
 
     public List<Learner> findByNameAndEmail(String learnerName, String learnerEmail){
         return _learnerRepository.findByLearnerNameAndLearnerEmail(learnerName, learnerEmail);
     }
 
-    public List<Learner> findByRequestParamLogic(String learnerName, String learnerEmail){
+    public List<Learner> findByNameOrEmail(String learnerName, String learnerEmail)throws LearnerNotFoundException{
         if(learnerName != null &&  learnerEmail != null)
             return findByNameAndEmail(learnerName, learnerEmail);
         if(learnerName == null && learnerEmail == null)
