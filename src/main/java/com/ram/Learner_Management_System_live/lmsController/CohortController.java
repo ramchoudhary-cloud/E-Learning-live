@@ -1,10 +1,13 @@
 package com.ram.Learner_Management_System_live.lmsController;
 
+import com.ram.Learner_Management_System_live.DTO.LearnerList;
 import com.ram.Learner_Management_System_live.entity.Cohort;
 import com.ram.Learner_Management_System_live.entity.ErrorResponse;
+import com.ram.Learner_Management_System_live.entity.Learner;
 import com.ram.Learner_Management_System_live.exception.CohortNotFoundException;
 import com.ram.Learner_Management_System_live.exception.LearnerNotFoundException;
 import com.ram.Learner_Management_System_live.lmsService.LearnerService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -29,19 +32,23 @@ public class CohortController {
     public List<Cohort> getAllCohorts(){
         return _learnerService.getAllCohorts();
     }
-    // basic noob way to design API endpoint with query parameters
-    @PostMapping("/assignLearnerToCohort")
-    public Cohort assignLearnerToCohort(@RequestParam("cohortId") Long cohortId, @RequestParam("learnerId") Long learnerId) throws CohortNotFoundException, LearnerNotFoundException {
-        return _learnerService.assignLearnerToCohort(cohortId, learnerId);
-    }
+    // (1) basic noob way to design API endpoint with query parameters,below API is optimal
+//    @PostMapping("/assignLearnerToCohort")
+//    public Cohort assignLearnerToCohort(@RequestParam("cohortId") Long cohortId, @RequestParam("learnerId") Long learnerId) throws CohortNotFoundException, LearnerNotFoundException {
+//        return _learnerService.assignLearnerToCohort(cohortId, learnerId);
+//    }
 
-    @ExceptionHandler(LearnerNotFoundException.class)
-    public ErrorResponse handleLearnerNotFoundException(LearnerNotFoundException ex){
-        return new ErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), new Date().toInstant().toEpochMilli(), ex.getStackTrace().toString());
-    }
+    // (2) optimal way to design API endpoint via parent/chaild relationship
+//    @PostMapping("/cohorts/{cohortId}/learners")
+//    public Cohort mapLearnerToCohort(@PathVariable("cohortId") Long cohortId, @RequestBody LearnerList learnerList)throws CohortNotFoundException{
+//    return _learnerService.mapLearnerToCohort(cohortId, learnerList.getLearnerList()); // wrapper class LearnerList
+//    }
+    // Above taking list of learnerId's in body...we are taking it in wrapper LearnerList class that we have created
+    // we can also use direct List<Long> learneIds;....instead
 
-    @ExceptionHandler(CohortNotFoundException.class)
-    public ErrorResponse handleCohortNotFoundException(LearnerNotFoundException ex){
-        return new ErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), new Date().toInstant().toEpochMilli(), ex.getStackTrace().toString());
+    // (3) Creating and Mapping learners to Cohort in single endpoint
+    @PostMapping("/cohorts/{cohortId}/learners")
+    public Cohort createLearnerAndMapToCohort(@PathVariable("cohortId") Long cohortId, @Valid @RequestBody List<Learner> learners) throws CohortNotFoundException {
+        return _learnerService.createLearnerAndMapToCohort(cohortId, learners);
     }
 }
